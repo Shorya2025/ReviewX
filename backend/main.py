@@ -121,7 +121,7 @@ def agent_syntax_and_casing(code: str, language: str) -> list:
         elif isinstance(node, ast.comprehension):
             for sub in ast.walk(node.target):
                 if isinstance(sub, ast.Name):
-                    defined_symbols[sub.id.lower()] = (sub.id, node.lineno)
+                    defined_symbols[sub.id.lower()] = (sub.id, sub.lineno)
 
         elif isinstance(node, (ast.With, ast.AsyncWith)):
             for item in node.items:
@@ -711,3 +711,9 @@ def apply_fixes_to_code(code: str, language: str, issues_to_fix: list) -> str:
         print(f"Error applying patch: {e}")
 
     return patched_code
+
+
+
+
+#testing ai code reviewer pr
+# GitHub PR integration test

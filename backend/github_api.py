@@ -139,6 +139,38 @@ def get_pull_request_files(
     return response.json()
 
 
+def get_pull_request(
+    owner,
+    repo,
+    pull_number
+):
+
+    access_token = get_installation_access_token()
+
+    headers = get_headers(access_token)
+
+    url = (
+        f"{GITHUB_API_URL}/repos/"
+        f"{owner}/{repo}/pulls/"
+        f"{pull_number}"
+    )
+
+    response = requests.get(
+        url,
+        headers=headers,
+        timeout=30
+    )
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"GitHub API error "
+            f"{response.status_code}: "
+            f"{response.text}"
+        )
+
+    return response.json()
+
+
 def get_pull_request_diff(
     owner,
     repo,
@@ -173,6 +205,90 @@ def get_pull_request_diff(
         )
 
     return response.text
+
+
+def create_pull_request_review_comment(
+    owner,
+    repo,
+    pull_number,
+    commit_id,
+    path,
+    line,
+    body,
+    side="RIGHT"
+):
+
+    access_token = get_installation_access_token()
+
+    headers = get_headers(access_token)
+
+    url = (
+        f"{GITHUB_API_URL}/repos/"
+        f"{owner}/{repo}/pulls/"
+        f"{pull_number}/comments"
+    )
+
+    payload = {
+        "body": body,
+        "commit_id": commit_id,
+        "path": path,
+        "line": line,
+        "side": side
+    }
+
+    response = requests.post(
+        url,
+        headers=headers,
+        json=payload,
+        timeout=30
+    )
+
+    if response.status_code != 201:
+        raise RuntimeError(
+            f"GitHub comment error "
+            f"{response.status_code}: "
+            f"{response.text}"
+        )
+
+    return response.json()
+
+
+def create_pull_request_summary_comment(
+    owner,
+    repo,
+    pull_number,
+    body
+):
+
+    access_token = get_installation_access_token()
+
+    headers = get_headers(access_token)
+
+    url = (
+        f"{GITHUB_API_URL}/repos/"
+        f"{owner}/{repo}/issues/"
+        f"{pull_number}/comments"
+    )
+
+    payload = {
+        "body": body
+    }
+
+    response = requests.post(
+        url,
+        headers=headers,
+        json=payload,
+        timeout=30
+    )
+
+    if response.status_code != 201:
+        raise RuntimeError(
+            f"GitHub summary comment error "
+            f"{response.status_code}: "
+            f"{response.text}"
+        )
+
+    return response.json()
 
 
 if __name__ == "__main__":
@@ -269,7 +385,6 @@ if __name__ == "__main__":
 
         raise SystemExit
 
-    # Use the first open PR for testing
     pull_request = pull_requests[0]
 
     pull_number = pull_request["number"]
@@ -283,6 +398,11 @@ if __name__ == "__main__":
     print(
         "Title:",
         pull_request["title"]
+    )
+
+    print(
+        "Latest commit:",
+        pull_request["head"]["sha"]
     )
 
     print()

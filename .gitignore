@@ -2,3 +2,7 @@
 secrets/
 *.pem
 .venv/
+
+__pycache__/
+*.pyc
+*.safe
